@@ -1,0 +1,39 @@
+name: Create dependency review example PR
+on:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        required: false
+        default: "main"
+  # Trigger this workflow when a new repo is created from this template
+  push:
+    branches:
+      - main
+
+jobs:
+  reset-repo:
+    name: Create PR
+    runs-on: ubuntu-latest
+    env:
+      git_User: ${{ github.actor }}
+      git_Email: ${{ github.actor }}@github.com
+      token: ${{ secrets.REPORESET }}
+
+    permissions:
+      actions: read
+      contents: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: [main]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: GitHub Auth
+        run: echo "${{ secrets.REPORESET }}" | gh auth login --with-token
+
+      - name: Create dependency review example PR
+        run: bash ./repo-reset/add-dependency.sh ${{ env.git_User }} ${{ env.git_Email }}
